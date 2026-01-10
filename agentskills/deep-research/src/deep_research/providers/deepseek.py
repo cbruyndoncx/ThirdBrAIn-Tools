@@ -3,6 +3,7 @@ DeepSeek Reasoning Provider
 Uses DeepSeek reasoning models with synchronous responses.
 """
 
+import sys
 import os
 from typing import Tuple, Optional
 from datetime import datetime
@@ -80,7 +81,7 @@ class DeepSeekProvider(BaseProvider):
             return "completed"
         return "in_progress"
 
-    def get_results(self, request_id: str) -> Tuple[str, Optional[str]]:
+    def get_results(self, request_id: str, output_path: Optional[str] = None) -> Tuple[str, Optional[str]]:
         """Retrieve results."""
         if request_id not in self._results_cache:
             return "Error: Request not found (already retrieved?)", None
@@ -99,7 +100,7 @@ class DeepSeekProvider(BaseProvider):
         )
 
         # Save to file
-        report_file = self._save_report(request_id, markdown)
+        report_file = self._save_report(request_id, markdown, output_path=output_path)
 
         return markdown, report_file
 
@@ -124,13 +125,20 @@ class DeepSeekProvider(BaseProvider):
         except Exception as e:
             return f"Error extracting content: {str(e)}"
 
-    def _save_report(self, request_id: str, markdown: str) -> Optional[str]:
+    def _save_report(self, request_id: str, markdown: str, output_path: Optional[str] = None) -> Optional[str]:
         """Save report to file."""
         try:
-            reports_dir = ensure_reports_dir()
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"deepseek_{request_id[:8]}_{timestamp}.md"
-            filepath = os.path.join(reports_dir, filename)
+            if output_path:
+                filepath = output_path
+                parent_dir = os.path.dirname(filepath)
+                if parent_dir and not os.path.exists(parent_dir):
+                    os.makedirs(parent_dir, exist_ok=True)
+                    print(f"📁 Created directory: {parent_dir}", file=sys.stderr)
+            else:
+                reports_dir = ensure_reports_dir()
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"deepseek_{request_id[:8]}_{timestamp}.md"
+                filepath = os.path.join(reports_dir, filename)
 
             with open(filepath, "w") as f:
                 f.write(markdown)

@@ -79,6 +79,10 @@ Examples:
         action="store_true",
         help="Show verbose output",
     )
+    parser.add_argument(
+        "--output",
+        help="Save results to specified file path",
+    )
 
     args = parser.parse_args()
 
@@ -138,7 +142,7 @@ Examples:
 
         # Step 3: Get results
         print("📥 Retrieving results...", file=sys.stderr)
-        report_md, report_file = provider.get_results(request_id=request_id)
+        report_md, report_file = provider.get_results(request_id=request_id, output_path=args.output)
 
         # Output the report
         print(report_md)

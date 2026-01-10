@@ -33,12 +33,13 @@ class BaseProvider(ABC):
         pass
 
     @abstractmethod
-    def get_results(self, request_id: str) -> Tuple[str, Optional[str]]:
+    def get_results(self, request_id: str, output_path: Optional[str] = None) -> Tuple[str, Optional[str]]:
         """
         Get research results.
 
         Args:
             request_id: Request ID from create_request
+            output_path: Optional custom file path to save results
 
         Returns:
             Tuple of (markdown_report, report_file_path)

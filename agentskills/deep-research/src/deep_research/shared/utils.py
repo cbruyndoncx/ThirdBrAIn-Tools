@@ -129,8 +129,6 @@ def format_markdown_report(
 
 def ensure_reports_dir() -> str:
     """Ensure research reports directory exists."""
-    reports_dir = os.path.expanduser(
-        os.getenv("RESEARCH_RESULTS_DIR", "~/research-results")
-    )
+    reports_dir = os.path.join(os.getcwd(), "99-TMP", "OUTPUT")
     os.makedirs(reports_dir, exist_ok=True)
     return reports_dir

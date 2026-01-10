@@ -298,7 +298,7 @@ class OpenAIProvider(BaseProvider):
         self.client = HTTPClient(timeout=120.0)
 
     def _get_default_model(self) -> str:
-        return "o1"
+        return "o4-mini-deep-research"
 
     def create_request(
         self,

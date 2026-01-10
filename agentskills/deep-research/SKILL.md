@@ -13,8 +13,19 @@ Unified deep research across multiple AI providers. Create research requests, au
 
 ## Usage
 
+**In Claude Code:**
 ```bash
-uvx --from git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools/agentskills/deep-research research [QUERY] [OPTIONS]
+/deep-research "Your research query" --provider deepseek
+```
+
+**Via uvx from GitHub:**
+```bash
+uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools research [QUERY] [OPTIONS]
+```
+
+**Local development:**
+```bash
+python -m scripts.research [QUERY] [OPTIONS]
 ```
 
 ## Options
@@ -35,17 +46,22 @@ uvx --from git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools/agentskills/deep-
 
 **DeepSeek (fast, synchronous)**
 ```bash
-uvx --from git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools/agentskills/deep-research research "What is quantum computing?" --provider deepseek
+python -m scripts.research "What is quantum computing?" --provider deepseek
 ```
 
 **OpenAI with auto-polling**
 ```bash
-uvx --from git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools/agentskills/deep-research research "Analyze AI trends" --provider openai --poll
+python -m scripts.research "Analyze AI trends" --provider openai --poll
 ```
 
 **Save to custom file path**
 ```bash
-uvx --from git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools/agentskills/deep-research research "Your query" --provider deepseek --output /path/to/report.md
+python -m scripts.research "Your query" --provider deepseek --output /path/to/report.md
+```
+
+**From GitHub via uvx**
+```bash
+uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools research "What is quantum computing?" --provider deepseek
 ```
 
 

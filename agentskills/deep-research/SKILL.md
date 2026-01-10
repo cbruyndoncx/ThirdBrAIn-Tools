@@ -5,9 +5,6 @@ allowed-tools:
   - Bash
   - Read
   - Write
-context: fork
-agent: general-purpose
-user-invocable: true
 ---
 
 # Deep Research Skill

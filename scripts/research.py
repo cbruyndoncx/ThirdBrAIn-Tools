@@ -326,7 +326,7 @@ class OpenAIProvider(BaseProvider):
             "tools": [
                 {"type": "web_search_preview"},
             ],
-            "background": True,  # Enable background processing
+            "background": False,  # Disable background processing
         }
 
         response = self.client.post(

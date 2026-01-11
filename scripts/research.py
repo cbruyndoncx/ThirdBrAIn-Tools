@@ -296,6 +296,7 @@ class OpenAIProvider(BaseProvider):
         self.api_key = get_api_key("openai")
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
         self.client = HTTPClient(timeout=120.0)
+        self._request_metadata = {}  # Store model info per request
 
     def _get_default_model(self) -> str:
         return "o4-mini-deep-research"
@@ -337,6 +338,12 @@ class OpenAIProvider(BaseProvider):
 
         request_id = response.get("id")
         status = response.get("status")
+
+        # Store metadata for later use
+        self._request_metadata[request_id] = {
+            "model": model,
+            "timestamp": datetime.now().strftime("%y%m%d_%H%M"),
+        }
 
         # Normalize status
         if status == "completed":
@@ -380,14 +387,30 @@ class OpenAIProvider(BaseProvider):
             headers=headers,
         )
 
+        # Get metadata if available
+        metadata = self._request_metadata.get(request_id, {})
+        model = metadata.get("model", "unknown")
+        timestamp = metadata.get("timestamp", datetime.now().strftime("%y%m%d_%H%M"))
+
+        # Save raw JSON first
+        self._save_raw_json(request_id, response, model=model, timestamp=timestamp, output_path=output_path)
+
         # Extract report from response
         report_content = self._extract_report(response)
 
         # Extract citations if available
         citations = self._extract_citations(response)
 
-        # Format as markdown
-        markdown = format_markdown_report(
+        # Format as markdown with frontmatter
+        frontmatter = f"""---
+provider: openai
+model: {model}
+request_id: {request_id}
+timestamp: {timestamp}
+---
+
+"""
+        markdown = frontmatter + format_markdown_report(
             title="Research Report",
             content=report_content,
             citations=citations,
@@ -395,15 +418,22 @@ class OpenAIProvider(BaseProvider):
         )
 
         # Save to file
-        report_file = self._save_report(request_id, markdown, output_path=output_path)
+        report_file = self._save_report(request_id, markdown, model=model, timestamp=timestamp, output_path=output_path)
 
         return markdown, report_file
 
     def _extract_report(self, response: dict) -> str:
         """Extract report content from response."""
-        # OpenAI response structure: response.content[0].research
         try:
-            # Handle different response structures
+            # Check for new output array structure (output[] -> type="message" -> content[] -> type="output_text")
+            if "output" in response:
+                for item in response.get("output", []):
+                    if item.get("type") == "message":
+                        for content_item in item.get("content", []):
+                            if content_item.get("type") == "output_text":
+                                return content_item.get("text", "")
+
+            # Fallback: old structure (content array)
             if "content" in response:
                 content = response.get("content")
                 if isinstance(content, list) and len(content) > 0:
@@ -436,19 +466,51 @@ class OpenAIProvider(BaseProvider):
             pass
         return citations
 
-    def _save_report(self, request_id: str, markdown: str, output_path: Optional[str] = None) -> Optional[str]:
+    def _save_raw_json(self, request_id: str, response: dict, model: str = "unknown", timestamp: str = None, output_path: Optional[str] = None) -> Optional[str]:
+        """Save raw JSON response to file."""
+        try:
+            if timestamp is None:
+                timestamp = datetime.now().strftime("%y%m%d_%H%M")
+
+            if output_path:
+                # If output path specified, append timestamp and add -raw.json suffix
+                base = output_path.rsplit(".", 1)[0]
+                filepath = f"{base}_{timestamp}-raw.json"
+                parent_dir = os.path.dirname(filepath)
+                if parent_dir and not os.path.exists(parent_dir):
+                    os.makedirs(parent_dir, exist_ok=True)
+            else:
+                reports_dir = ensure_reports_dir()
+                filename = f"openai_{model}_{timestamp}-raw.json"
+                filepath = os.path.join(reports_dir, filename)
+
+            with open(filepath, "w") as f:
+                json.dump(response, f, indent=2)
+
+            print(f"💾 Raw JSON saved: {filepath}", file=sys.stderr)
+            return filepath
+        except Exception as e:
+            print(f"Warning: Could not save raw JSON: {e}", file=sys.stderr)
+            return None
+
+    def _save_report(self, request_id: str, markdown: str, model: str = "unknown", timestamp: str = None, output_path: Optional[str] = None) -> Optional[str]:
         """Save report to file."""
         try:
+            if timestamp is None:
+                timestamp = datetime.now().strftime("%y%m%d_%H%M")
+
             if output_path:
-                filepath = output_path
+                # If output path specified, append timestamp before extension
+                base = output_path.rsplit(".", 1)[0]
+                ext = output_path.rsplit(".", 1)[1] if "." in output_path else "md"
+                filepath = f"{base}_{timestamp}.{ext}"
                 parent_dir = os.path.dirname(filepath)
                 if parent_dir and not os.path.exists(parent_dir):
                     os.makedirs(parent_dir, exist_ok=True)
                     print(f"📁 Created directory: {parent_dir}", file=sys.stderr)
             else:
                 reports_dir = ensure_reports_dir()
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"openai_{request_id[:8]}_{timestamp}.md"
+                filename = f"openai_{model}_{timestamp}.md"
                 filepath = os.path.join(reports_dir, filename)
 
             with open(filepath, "w") as f:
@@ -472,6 +534,7 @@ class DeepSeekProvider(BaseProvider):
         self.base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
         self.client = HTTPClient(timeout=300.0)  # Longer timeout for reasoning
         self._results_cache = {}  # Cache results from create_request
+        self._request_metadata = {}  # Store model info per request
 
     def _get_default_model(self) -> str:
         return "deepseek-reasoner"
@@ -512,6 +575,12 @@ class DeepSeekProvider(BaseProvider):
         # Generate synthetic request ID for consistency
         request_id = f"deepseek_{id(response)}"
 
+        # Store metadata
+        self._request_metadata[request_id] = {
+            "model": model,
+            "timestamp": datetime.now().strftime("%y%m%d_%H%M"),
+        }
+
         # Cache the result since DeepSeek returns immediately
         self._results_cache[request_id] = {
             "response": response,
@@ -536,18 +605,31 @@ class DeepSeekProvider(BaseProvider):
         cached = self._results_cache.pop(request_id)
         response = cached["response"]
 
+        # Get metadata
+        metadata = self._request_metadata.get(request_id, {})
+        model = metadata.get("model", cached.get("model", "unknown"))
+        timestamp = metadata.get("timestamp", datetime.now().strftime("%y%m%d_%H%M"))
+
         # Extract reasoning and response
         content = self._extract_content(response)
 
-        # Format as markdown
-        markdown = format_markdown_report(
+        # Format as markdown with frontmatter
+        frontmatter = f"""---
+provider: deepseek
+model: {model}
+request_id: {request_id}
+timestamp: {timestamp}
+---
+
+"""
+        markdown = frontmatter + format_markdown_report(
             title="Research Report",
             content=content,
             source="DeepSeek Reasoning",
         )
 
         # Save to file
-        report_file = self._save_report(request_id, markdown, output_path=output_path)
+        report_file = self._save_report(request_id, markdown, model=model, timestamp=timestamp, output_path=output_path)
 
         return markdown, report_file
 
@@ -572,19 +654,24 @@ class DeepSeekProvider(BaseProvider):
         except Exception as e:
             return f"Error extracting content: {str(e)}"
 
-    def _save_report(self, request_id: str, markdown: str, output_path: Optional[str] = None) -> Optional[str]:
+    def _save_report(self, request_id: str, markdown: str, model: str = "unknown", timestamp: str = None, output_path: Optional[str] = None) -> Optional[str]:
         """Save report to file."""
         try:
+            if timestamp is None:
+                timestamp = datetime.now().strftime("%y%m%d_%H%M")
+
             if output_path:
-                filepath = output_path
+                # If output path specified, append timestamp before extension
+                base = output_path.rsplit(".", 1)[0]
+                ext = output_path.rsplit(".", 1)[1] if "." in output_path else "md"
+                filepath = f"{base}_{timestamp}.{ext}"
                 parent_dir = os.path.dirname(filepath)
                 if parent_dir and not os.path.exists(parent_dir):
                     os.makedirs(parent_dir, exist_ok=True)
                     print(f"📁 Created directory: {parent_dir}", file=sys.stderr)
             else:
                 reports_dir = ensure_reports_dir()
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"deepseek_{request_id[:8]}_{timestamp}.md"
+                filename = f"deepseek_{model}_{timestamp}.md"
                 filepath = os.path.join(reports_dir, filename)
 
             with open(filepath, "w") as f:
@@ -698,7 +785,12 @@ Examples:
             model=args.model,
             verbose=args.verbose,
         )
-        print(f"✓ Request created: {request_id}", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("=" * 70, file=sys.stderr)
+        print(f"✓ Request created successfully!", file=sys.stderr)
+        print(f"  Request ID: {request_id}", file=sys.stderr)
+        print("=" * 70, file=sys.stderr)
+        print("", file=sys.stderr)
 
         # Step 2: Check status and poll if needed
         if status == "in_progress" and args.poll:
@@ -711,9 +803,17 @@ Examples:
         if status == "completed":
             print("✓ Research complete", file=sys.stderr)
         elif status == "in_progress":
-            print_error("Research still in progress. Use --poll to wait for completion.")
-            print_error(f"Request ID: {request_id}")
-            sys.exit(1)
+            print("", file=sys.stderr)
+            print("=" * 70, file=sys.stderr)
+            print("⏳ Research still in progress (background processing)", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("To check status or retrieve results later, use:", file=sys.stderr)
+            print(f"  python3 poll_research.py {request_id}", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("Or check status only:", file=sys.stderr)
+            print(f"  python3 poll_research.py {request_id} --check-only", file=sys.stderr)
+            print("=" * 70, file=sys.stderr)
+            sys.exit(0)  # Exit cleanly, not an error
         elif status == "failed":
             print_error("Research failed")
             sys.exit(1)

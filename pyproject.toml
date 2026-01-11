@@ -20,6 +20,8 @@ dev = [
 
 [project.scripts]
 research = "scripts.research:main"
+generate_gamma_presentation = "scripts.generate_gamma_presentation:main"
+get_gamma_assets = "scripts.get_gamma_assets:main"
 
 [tool.setuptools]
 package-dir = {"" = "."}

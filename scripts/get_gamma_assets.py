@@ -47,6 +47,13 @@ def ensure_env_loaded(env_file: Optional[str] = None) -> None:
 GAMMA_API_BASE_URL = "https://public-api.gamma.app/v1.0/generations"
 GAMMA_API_KEY_HEADER = "X-API-KEY"
 GAMMA_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+EXPORT_URL_KEYS = (
+    "url",
+    "exportUrl",
+    "export_url",
+    "outputUrl",
+    "output_url",
+)
 
 
 def get_api_key() -> str:
@@ -79,6 +86,19 @@ def make_request(url: str, api_key: Optional[str] = None) -> Dict[str, Any]:
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
         raise RuntimeError(f"HTTP {e.code}: {error_body}")
+
+
+def extract_export_url(candidate: Any) -> Optional[str]:
+    """Extract export-related URL from a dict or string."""
+    if isinstance(candidate, dict):
+        for key in EXPORT_URL_KEYS:
+            value = candidate.get(key)
+            if value:
+                return value
+    elif isinstance(candidate, str):
+        return candidate
+
+    return None
 
 
 def extract_url(data: Dict[str, Any], export_type: str) -> Optional[str]:
@@ -141,18 +161,22 @@ def get_presentation_assets(
         if not exports and data.get("exports"):
             exports = data.get("exports")
             if isinstance(exports, list) and len(exports) > 0:
-                # Typically PDF is first, PPTX is second
-                for i, export in enumerate(exports):
-                    if isinstance(export, dict):
-                        if export.get("url") and not pdf_url:
-                            pdf_url = export.get("url")
-                        elif export.get("url") and not pptx_url:
-                            pptx_url = export.get("url")
-                    elif isinstance(export, str):
-                        if not pdf_url:
-                            pdf_url = export
-                        elif not pptx_url:
-                            pptx_url = export
+                for export in exports:
+                    export_url = extract_export_url(export)
+                    if not export_url:
+                        continue
+
+                    if not pdf_url:
+                        pdf_url = export_url
+                    elif not pptx_url:
+                        pptx_url = export_url
+
+        # Fallback to any export URL fields from the top-level response
+        fallback_export_url = extract_export_url(data)
+        if fallback_export_url:
+            result.setdefault("export_url", fallback_export_url)
+            if not pdf_url:
+                pdf_url = fallback_export_url
 
         if pdf_url:
             result["pdf"] = pdf_url

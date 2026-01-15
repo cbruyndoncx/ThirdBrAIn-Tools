@@ -121,9 +121,12 @@ def extract_url(data: Dict[str, Any], export_type: str) -> Optional[str]:
 
 
 def download_file(url: str, output_path: str) -> bool:
-    """Download a file from URL to local path."""
+    """Download a file from URL to local path including UA headers."""
+    request = urllib.request.Request(url, headers={"User-Agent": GAMMA_USER_AGENT})
     try:
-        urllib.request.urlretrieve(url, output_path)
+        with urllib.request.urlopen(request, timeout=60) as response, open(output_path, "wb") as out_file:
+            while chunk := response.read(8192):
+                out_file.write(chunk)
         return True
     except Exception as e:
         print(f"Failed to download {url}: {e}", file=sys.stderr)

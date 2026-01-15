@@ -124,6 +124,7 @@ def get_presentation_assets(
 
         result: Dict[str, Any] = {
             "generation_id": generation_id,
+            "response": data,
         }
 
         # Extract URLs

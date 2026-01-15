@@ -15,6 +15,7 @@ Providers:
 import sys
 import argparse
 import os
+from dotenv import load_dotenv
 import httpx
 import json
 from typing import Tuple, Optional, List
@@ -75,6 +76,9 @@ def get_api_key(provider: str, key_name: str = None) -> str:
     """Get API key from environment."""
     if key_name is None:
         key_name = f"{provider.upper()}_API_KEY"
+
+    # Loads .env from current working directory
+    load_dotenv()
 
     api_key = os.getenv(key_name)
     if not api_key:

@@ -11,6 +11,7 @@ Usage:
 import argparse
 import json
 import os
+from dotenv import load_dotenv
 import sys
 import time
 from typing import Any, Dict, Optional
@@ -27,7 +28,16 @@ POLL_INTERVAL_MS = 30 * 1000  # 30 seconds
 
 def get_api_key() -> str:
     """Get Gamma API key from environment."""
-    api_key = os.environ.get("GAMMA_API_KEY")
+    # Explicit: load from current working directory
+    # from dotenv import load_dotenv
+    # from pathlib import Path
+    # load_dotenv(Path.cwd() / ".env")
+
+    # Loads .env from current working directory
+    load_dotenv()
+
+    # Access variables
+    api_key = os.getenv("GAMMA_API_KEY")
     if not api_key:
         raise ValueError("GAMMA_API_KEY environment variable not set")
     return api_key
@@ -41,9 +51,8 @@ def make_request(
         api_key = get_api_key()
 
     headers = {
-        "Accept": "application/json",
-        GAMMA_API_KEY_HEADER: api_key,
         "Content-Type": "application/json",
+        GAMMA_API_KEY_HEADER: api_key,
     }
 
     body_data = None
@@ -166,7 +175,8 @@ def poll_generation_status(generation_id: str, api_key: Optional[str] = None) ->
 
 def generate_presentation(params: Dict[str, Any]) -> Dict[str, Any]:
     """Generate a presentation using the Gamma API."""
-    api_key = get_api_key()
+
+    api_key  = get_api_key()
 
     # Build request body
     body: Dict[str, Any] = {

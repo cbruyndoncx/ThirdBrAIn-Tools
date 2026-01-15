@@ -25,6 +25,7 @@ Environment:
 import sys
 import argparse
 import os
+from dotenv import load_dotenv
 import httpx
 import json
 import time
@@ -33,6 +34,10 @@ from datetime import datetime
 
 def get_api_key():
     """Get OpenAI API key from environment."""
+    # Loads .env from current working directory
+    load_dotenv()
+    
+    # Only OpenAI has polling
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         print("❌ Error: OPENAI_API_KEY not set", file=sys.stderr)

@@ -11,6 +11,7 @@ Usage:
 import argparse
 import json
 import os
+from dotenv import load_dotenv
 import sys
 import urllib.request
 import urllib.error
@@ -25,7 +26,16 @@ GAMMA_API_KEY_HEADER = "X-API-KEY"
 
 def get_api_key() -> str:
     """Get Gamma API key from environment."""
-    api_key = os.environ.get("GAMMA_API_KEY")
+    # Explicit: load from current working directory
+    # from dotenv import load_dotenv
+    # from pathlib import Path
+    # load_dotenv(Path.cwd() / ".env")
+
+    # Loads .env from current working directory
+    load_dotenv()
+
+    # Access variables
+    api_key = os.getenv("GAMMA_API_KEY")
     if not api_key:
         raise ValueError("GAMMA_API_KEY environment variable not set")
     return api_key

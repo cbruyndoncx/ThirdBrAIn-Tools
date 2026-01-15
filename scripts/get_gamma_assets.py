@@ -19,6 +19,30 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 
+_ENV_FILE_PATH: Optional[Path] = None
+_ENV_LOADED = False
+
+
+def ensure_env_loaded(env_file: Optional[str] = None) -> None:
+    """Load dotenv configuration once (optionally from a custom path)."""
+    global _ENV_FILE_PATH, _ENV_LOADED
+    if env_file:
+        env_path = Path(env_file).expanduser()
+        if not env_path.is_file():
+            raise FileNotFoundError(f".env file not found: {env_path}")
+        _ENV_FILE_PATH = env_path
+
+    if _ENV_LOADED:
+        return
+
+    if _ENV_FILE_PATH:
+        load_dotenv(dotenv_path=str(_ENV_FILE_PATH))
+    else:
+        load_dotenv()
+
+    _ENV_LOADED = True
+
+
 # Configuration
 GAMMA_API_BASE_URL = "https://public-api.gamma.app/v1.0/generations"
 GAMMA_API_KEY_HEADER = "X-API-KEY"
@@ -26,13 +50,7 @@ GAMMA_API_KEY_HEADER = "X-API-KEY"
 
 def get_api_key() -> str:
     """Get Gamma API key from environment."""
-    # Explicit: load from current working directory
-    # from dotenv import load_dotenv
-    # from pathlib import Path
-    # load_dotenv(Path.cwd() / ".env")
-
-    # Loads .env from current working directory
-    load_dotenv()
+    ensure_env_loaded()
 
     # Access variables
     api_key = os.getenv("GAMMA_API_KEY")
@@ -198,6 +216,10 @@ def main():
         help="Directory to download assets to (default: 99-TMP/OUTPUT)",
     )
     parser.add_argument(
+        "--env-file",
+        help="Path to a .env file so API keys can be loaded from any directory",
+    )
+    parser.add_argument(
         "--output-json",
         action="store_true",
         default=True,
@@ -205,6 +227,8 @@ def main():
     )
 
     args = parser.parse_args()
+
+    ensure_env_loaded(args.env_file)
 
     # Get assets
     result = get_presentation_assets(

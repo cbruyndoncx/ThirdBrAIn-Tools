@@ -11,6 +11,7 @@ Usage:
 import argparse
 import json
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 import sys
 import time
@@ -26,15 +27,33 @@ TIMEOUT_MS = 10 * 60 * 1000  # 10 minutes
 POLL_INTERVAL_MS = 30 * 1000  # 30 seconds
 
 
+_ENV_FILE_PATH: Optional[Path] = None
+_ENV_LOADED = False
+
+
+def ensure_env_loaded(env_file: Optional[str] = None) -> None:
+    """Load dotenv configuration once (optionally from a custom path)."""
+    global _ENV_FILE_PATH, _ENV_LOADED
+    if env_file:
+        env_path = Path(env_file).expanduser()
+        if not env_path.is_file():
+            raise FileNotFoundError(f".env file not found: {env_path}")
+        _ENV_FILE_PATH = env_path
+
+    if _ENV_LOADED:
+        return
+
+    if _ENV_FILE_PATH:
+        load_dotenv(dotenv_path=str(_ENV_FILE_PATH))
+    else:
+        load_dotenv()
+
+    _ENV_LOADED = True
+
+
 def get_api_key() -> str:
     """Get Gamma API key from environment."""
-    # Explicit: load from current working directory
-    # from dotenv import load_dotenv
-    # from pathlib import Path
-    # load_dotenv(Path.cwd() / ".env")
-
-    # Loads .env from current working directory
-    load_dotenv()
+    ensure_env_loaded()
 
     # Access variables
     api_key = os.getenv("GAMMA_API_KEY")
@@ -397,8 +416,14 @@ def main():
         default=True,
         help="Output as JSON (default: true)",
     )
+    parser.add_argument(
+        "--env-file",
+        help="Path to a .env file so the Gamma API key can be loaded from any directory",
+    )
 
     args = parser.parse_args()
+
+    ensure_env_loaded(args.env_file)
 
     # Validate and read input
     input_text = None

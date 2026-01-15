@@ -4,6 +4,8 @@ Helper scripts for conducting comprehensive AI-powered research with OpenAI and 
 
 ## Scripts Overview
 
+**Tip:** add `--help` to any helper (`research.py`, `poll_research.py`, `generate_gamma_presentation.py`, `get_gamma_assets.py`) to see the full list of arguments and their explanations before running.
+
 ### 1. `research.py` - Main Research Script
 
 Primary script for creating and managing deep research requests.
@@ -16,6 +18,8 @@ python3 research.py --query-file query.md --provider openai --poll
 # Without polling (returns request ID immediately)
 python3 research.py --query-file query.md --provider openai
 ```
+
+**Load credentials from elsewhere:** use `--env-file /path/to/.env` when running from a different directory so `OPENAI_API_KEY`/`DEEPSEEK_API_KEY` load regardless of your CWD.
 
 **Key Features:**
 - Supports OpenAI and DeepSeek providers
@@ -39,6 +43,8 @@ python3 poll_research.py resp_abc123def456 --check-only
 # Poll with custom timeout (1 hour)
 python3 poll_research.py resp_abc123def456 --timeout 3600
 ```
+
+**Load credentials from elsewhere:** add `--env-file /path/to/.env` so `OPENAI_API_KEY` is read even if the script is executed from outside the repo.
 
 **Use Cases:**
 - Reconnect after disconnection
@@ -285,6 +291,10 @@ python3 research.py --query-file query.md --provider openai > request_id.txt 2>&
 REQUEST_ID=$(grep "Request ID:" request_id.txt | cut -d: -f2 | tr -d ' ')
 python3 poll_research.py $REQUEST_ID --output final-report.md
 ```
+
+## Gamma helpers
+
+`generate_gamma_presentation.py` and `get_gamma_assets.py` now accept `--env-file /path/to/.env` so they can pick up `GAMMA_API_KEY` even when you execute the helpers outside the repository root.
 
 ## Troubleshooting
 

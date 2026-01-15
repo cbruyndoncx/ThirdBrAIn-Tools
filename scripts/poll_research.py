@@ -25,6 +25,8 @@ Environment:
 import sys
 import argparse
 import os
+from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 import httpx
 import json
@@ -32,10 +34,33 @@ import time
 from datetime import datetime
 
 
+_ENV_FILE_PATH: Optional[Path] = None
+_ENV_LOADED = False
+
+
+def ensure_env_loaded(env_file: Optional[str] = None) -> None:
+    """Load dotenv configuration once (optionally from a custom path)."""
+    global _ENV_FILE_PATH, _ENV_LOADED
+    if env_file:
+        env_path = Path(env_file).expanduser()
+        if not env_path.is_file():
+            raise FileNotFoundError(f".env file not found: {env_path}")
+        _ENV_FILE_PATH = env_path
+
+    if _ENV_LOADED:
+        return
+
+    if _ENV_FILE_PATH:
+        load_dotenv(dotenv_path=str(_ENV_FILE_PATH))
+    else:
+        load_dotenv()
+
+    _ENV_LOADED = True
+
+
 def get_api_key():
     """Get OpenAI API key from environment."""
-    # Loads .env from current working directory
-    load_dotenv()
+    ensure_env_loaded()
     
     # Only OpenAI has polling
     api_key = os.getenv("OPENAI_API_KEY")
@@ -257,10 +282,15 @@ Examples:
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed polling progress")
     parser.add_argument("--timeout", type=int, default=1800, help="Maximum timeout in seconds (default: 1800 = 30 min)")
     parser.add_argument("--check-only", action="store_true", help="Only check status, don't poll")
+    parser.add_argument(
+        "--env-file",
+        help="Path to a .env file so API keys can be loaded from any directory",
+    )
 
     args = parser.parse_args()
 
     try:
+        ensure_env_loaded(args.env_file)
         api_key = get_api_key()
 
         if args.check_only:

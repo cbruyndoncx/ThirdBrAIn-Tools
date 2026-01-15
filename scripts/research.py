@@ -15,6 +15,7 @@ Providers:
 import sys
 import argparse
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 import httpx
 import json
@@ -72,13 +73,36 @@ class HTTPClient:
 # Utilities
 # ============================================================================
 
+_ENV_FILE_PATH: Optional[Path] = None
+_ENV_LOADED = False
+
+
+def ensure_env_loaded(env_file: Optional[str] = None) -> None:
+    """Load the .env file once, optionally from a custom path."""
+    global _ENV_FILE_PATH, _ENV_LOADED
+    if env_file:
+        env_path = Path(env_file).expanduser()
+        if not env_path.is_file():
+            raise FileNotFoundError(f".env file not found: {env_path}")
+        _ENV_FILE_PATH = env_path
+
+    if _ENV_LOADED:
+        return
+
+    if _ENV_FILE_PATH:
+        load_dotenv(dotenv_path=str(_ENV_FILE_PATH))
+    else:
+        load_dotenv()
+
+    _ENV_LOADED = True
+
+
 def get_api_key(provider: str, key_name: str = None) -> str:
     """Get API key from environment."""
     if key_name is None:
         key_name = f"{provider.upper()}_API_KEY"
 
-    # Loads .env from current working directory
-    load_dotenv()
+    ensure_env_loaded()
 
     api_key = os.getenv(key_name)
     if not api_key:
@@ -730,6 +754,10 @@ Examples:
         help="Read query from file instead of command line",
     )
     parser.add_argument(
+        "--env-file",
+        help="Path to a .env file to load (default: look in current directory)",
+    )
+    parser.add_argument(
         "--provider",
         default=os.getenv("REASONING_DEFAULT_PROVIDER", "openai"),
         help="AI provider: openai, deepseek (default: $REASONING_DEFAULT_PROVIDER or openai)",
@@ -774,6 +802,8 @@ Examples:
         sys.exit(1)
 
     try:
+        ensure_env_loaded(args.env_file)
+
         # Get provider
         provider = get_provider(args.provider)
 

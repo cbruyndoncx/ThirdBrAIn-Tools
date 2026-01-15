@@ -37,6 +37,8 @@ export DEEPSEEK_API_KEY="your-key"
 uvx --from ~/.claude/skills/deep-research research "What is quantum computing?" --provider deepseek
 ```
 
+**Tip:** Run any helper with `--help` to review all available flags before invoking it.
+
 **Command Reference:**
 
 | Command | Purpose |

@@ -46,6 +46,7 @@ def ensure_env_loaded(env_file: Optional[str] = None) -> None:
 # Configuration
 GAMMA_API_BASE_URL = "https://public-api.gamma.app/v1.0/generations"
 GAMMA_API_KEY_HEADER = "X-API-KEY"
+GAMMA_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 
 def get_api_key() -> str:
@@ -67,6 +68,7 @@ def make_request(url: str, api_key: Optional[str] = None) -> Dict[str, Any]:
     headers = {
         "Accept": "application/json",
         GAMMA_API_KEY_HEADER: api_key,
+        "User-Agent": GAMMA_USER_AGENT,
     }
 
     req = urllib.request.Request(url, headers=headers, method="GET")

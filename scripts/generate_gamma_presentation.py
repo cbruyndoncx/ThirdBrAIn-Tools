@@ -23,6 +23,7 @@ import urllib.error
 # Configuration
 GAMMA_API_BASE_URL = "https://public-api.gamma.app/v1.0/generations"
 GAMMA_API_KEY_HEADER = "X-API-KEY"
+GAMMA_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 TIMEOUT_MS = 10 * 60 * 1000  # 10 minutes
 POLL_INTERVAL_MS = 30 * 1000  # 30 seconds
 
@@ -72,6 +73,7 @@ def make_request(
     headers = {
         "Content-Type": "application/json",
         GAMMA_API_KEY_HEADER: api_key,
+        "User-Agent": GAMMA_USER_AGENT,
     }
 
     body_data = None

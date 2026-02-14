@@ -1,4 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "httpx>=0.27.0",
+#     "python-dotenv>=1.0.0",
+# ]
+# ///
 """
 Poll OpenAI Deep Research Request
 
@@ -6,17 +13,17 @@ Polls an OpenAI deep research request until completion, then saves results.
 Useful for reconnecting to long-running research jobs.
 
 Usage:
-    python3 poll_research.py REQUEST_ID [--output OUTPUT_FILE] [--verbose]
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research REQUEST_ID [--output OUTPUT_FILE] [--verbose]
 
 Examples:
     # Poll and auto-save
-    python3 poll_research.py resp_abc123
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123
 
     # Poll and save to specific file
-    python3 poll_research.py resp_abc123 --output research-report.md
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123 --output report.md
 
-    # Poll with verbose output
-    python3 poll_research.py resp_abc123 --verbose
+Alternative (direct script):
+    uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/poll_research.py REQUEST_ID
 
 Environment:
     OPENAI_API_KEY - Required API key
@@ -178,7 +185,7 @@ def poll_until_complete(request_id: str, api_key: str, verbose: bool = False, ma
         if elapsed >= max_timeout:
             print(f"⏱ Timeout after {elapsed}s", file=sys.stderr)
             print(f"   Request still in progress. You can poll again later with:", file=sys.stderr)
-            print(f"   python3 poll_research.py {request_id}", file=sys.stderr)
+            print(f'   uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research {request_id}', file=sys.stderr)
             sys.exit(1)
 
         # Adaptive sleep
@@ -271,9 +278,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python3 poll_research.py resp_abc123
-  python3 poll_research.py resp_abc123 --output report.md --verbose
-  python3 poll_research.py resp_abc123 --timeout 3600  # 1 hour timeout
+  uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123
+  uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123 --output report.md --verbose
         """,
     )
 

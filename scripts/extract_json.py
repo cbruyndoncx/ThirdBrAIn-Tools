@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
 """
 Extract markdown content from OpenAI deep research JSON response.
 
@@ -7,10 +11,13 @@ output types (reasoning, web_search_call, message). This script extracts
 the actual markdown report from the 'message' type content.
 
 Usage:
-    python3 extract_json.py INPUT_JSON OUTPUT_MD
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" extract_json INPUT_JSON OUTPUT_MD
 
 Example:
-    python3 extract_json.py 99-TMP/OUTPUT/research-raw.json 99-TMP/OUTPUT/research.md
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" extract_json research-raw.json research.md
+
+Alternative (direct script):
+    uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/extract_json.py INPUT_JSON OUTPUT_MD
 """
 
 import json
@@ -49,13 +56,17 @@ def extract_research_content(input_file, output_file):
     print(f'  Output: {output_file}')
     print(f'  Size:   {len(content):,} characters')
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) != 3:
-        print('Usage: python3 extract_json.py INPUT_JSON OUTPUT_MD')
-        print('Example: python3 extract_json.py research-raw.json research.md')
+        print('Usage: uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" extract_json INPUT_JSON OUTPUT_MD')
+        print('Example: uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" extract_json research-raw.json research.md')
         sys.exit(1)
 
     input_file = sys.argv[1]
     output_file = sys.argv[2]
 
     extract_research_content(input_file, output_file)
+
+
+if __name__ == '__main__':
+    main()

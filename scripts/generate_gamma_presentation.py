@@ -1,11 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "python-dotenv>=1.0.0",
+# ]
+# ///
 """
 Gamma Presentation Generator
 Generate presentations, documents, social posts, and websites using the Gamma API.
 
 Usage:
-    python generate_presentation.py --input-text "Your content" --format presentation
-    python generate_presentation.py --input-file ./content.md --format presentation
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-text "Your content" --format presentation
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-file ./content.md --format presentation
+
+Alternative (direct script):
+    uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/generate_gamma_presentation.py --input-text "Your content"
 """
 
 import argparse

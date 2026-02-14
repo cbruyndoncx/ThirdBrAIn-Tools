@@ -1,11 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "python-dotenv>=1.0.0",
+# ]
+# ///
 """
 Gamma Presentation Assets Getter
 Retrieve and optionally download presentation exports (PDF, PPTX).
 
 Usage:
-    python get_presentation_assets.py --generation-id abc123
-    python get_presentation_assets.py --generation-id abc123 --download --output-dir ./exports
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets --generation-id abc123
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets --generation-id abc123 --download --output-dir ./exports
+
+Alternative (direct script):
+    uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/get_gamma_assets.py --generation-id abc123
 """
 
 import argparse

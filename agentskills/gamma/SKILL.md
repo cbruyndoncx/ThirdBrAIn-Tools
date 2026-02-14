@@ -7,25 +7,19 @@ description: Generate presentations, documents, social media posts, and websites
 
 Generate presentations, documents, social media posts, and websites using the Gamma API. This skill provides two core scripts for maximum flexibility:
 
-- **generate_gamma_presentation.py** - Full customization of any generation
-- **get_gamma_assets.py** - Retrieve and download exports
+- **generate_gamma_presentation** - Full customization of any generation
+- **get_gamma_assets** - Retrieve and download exports
 
 ## Usage
 
-**In Claude Code:**
-```bash
-/gamma "Generate a presentation about Q4 results"
-```
-
 **Via uvx from GitHub:**
 ```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation [OPTIONS]
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-file content.md
 ```
 
-**Local development:**
+**Alternative (direct script):**
 ```bash
-python -m scripts.generate_gamma_presentation [OPTIONS]
-python -m scripts.get_gamma_assets [OPTIONS]
+uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/generate_gamma_presentation.py --input-file content.md
 ```
 
 ## Quick Start
@@ -33,8 +27,7 @@ python -m scripts.get_gamma_assets [OPTIONS]
 ### Generate a Basic Presentation from File
 
 ```bash
-# Generate presentation from input file
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation \
   --input-file 99-TMP/INPUT/presentation.md \
   --format presentation \
   --num-cards 10
@@ -43,8 +36,7 @@ uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presen
 ### Generate Executive Presentation as PowerPoint (PPTX)
 
 ```bash
-# Generate as PPTX presentation from input file
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation \
   --input-file 99-TMP/INPUT/executive_summary.md \
   --format presentation \
   --text-mode condense \
@@ -62,8 +54,7 @@ uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presen
 ### Generate Executive Presentation as PDF Report
 
 ```bash
-# Generate as PDF document from same input file
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation \
   --input-file 99-TMP/INPUT/executive_summary.md \
   --format document \
   --text-mode preserve \
@@ -77,62 +68,14 @@ uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presen
   --card-dimensions a4
 ```
 
-### Generate Both PPTX and PDF from Same Content
-
-```bash
-# Generate PPTX
-PPTX_RESPONSE=$(uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/executive_summary.md \
-  --format presentation \
-  --text-mode condense \
-  --export-as pptx \
-  --card-split inputTextBreaks \
-  --text-amount medium \
-  --text-tone "professional and confident" \
-  --text-audience "executives and senior leadership" \
-  --image-source aiGenerated \
-  --image-style photorealistic \
-  --card-dimensions "16x9")
-
-PPTX_ID=$(echo $PPTX_RESPONSE | jq -r '.generation_id')
-
-# Generate PDF
-PDF_RESPONSE=$(uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/executive_summary.md \
-  --format document \
-  --text-mode preserve \
-  --export-as pdf \
-  --card-split auto \
-  --text-amount detailed \
-  --text-tone "professional and confident" \
-  --text-audience "executives and senior leadership" \
-  --image-source aiGenerated \
-  --image-style photorealistic \
-  --card-dimensions a4)
-
-PDF_ID=$(echo $PDF_RESPONSE | jq -r '.generation_id')
-
-# Retrieve both and download to output directory
-sleep 5
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets \
-  --generation-id $PPTX_ID \
-  --download \
-  --output-dir 99-TMP/OUTPUT
-
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets \
-  --generation-id $PDF_ID \
-  --download \
-  --output-dir 99-TMP/OUTPUT
-```
-
 ### Retrieve Assets
 
 ```bash
 # Get URLs
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets --generation-id abc123
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets --generation-id abc123
 
 # Download files to output directory
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets \
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets \
   --generation-id abc123 \
   --download \
   --output-dir 99-TMP/OUTPUT
@@ -142,7 +85,7 @@ uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets \
 
 ## Core Scripts
 
-### generate_gamma_presentation.py
+### generate_gamma_presentation
 
 Generate a new presentation with full customization options.
 
@@ -170,83 +113,22 @@ Generate a new presentation with full customization options.
 - `--card-split` - `auto` or `inputTextBreaks`
 - `--theme-id` - Theme ID to apply
 - `--additional-instructions` - Custom generation instructions (text)
-- `--additional-instructions-file` - Path to file with custom instructions (alternative to --additional-instructions)
-- `--card-header-footer` - Header/footer config as JSON
-- `--folder-ids` - Target folders as JSON array
-- `--sharing-workspace-access` - Workspace access level
-- `--sharing-external-access` - External sharing level
+- `--additional-instructions-file` - Path to file with custom instructions
+- `--env-file` - Load credentials from specific .env file
 
 **Output:** JSON with `url`, `generation_id`, and `error` fields
 
-### get_gamma_assets.py
+### get_gamma_assets
 
 Retrieve presentation exports and optionally download them.
 
 **Inputs:**
 - `--generation-id` (required) - ID from generate_gamma_presentation
 - `--download` - Flag to download files locally
-- `--output-dir` - Download destination (default: /tmp/gamma_exports)
+- `--output-dir` - Download destination (default: 99-TMP/OUTPUT)
+- `--env-file` - Load credentials from specific .env file
 
 **Output:** JSON with `pdf`, `pptx` URLs and optional local paths
-
----
-
-## Preset Patterns
-
-### Executive Presentation Pattern
-
-Ideal for C-level presentations with professional defaults:
-
-```bash
-generate_gamma_presentation \
-  --input-text "<your-content>" \
-  --format presentation \
-  --text-mode condense \
-  --export-as pptx \
-  --card-split inputTextBreaks \
-  --text-amount medium \
-  --text-tone "professional and confident" \
-  --text-audience "executives and senior leadership" \
-  --image-source aiGenerated \
-  --image-style photorealistic \
-  --card-dimensions "16x9"
-```
-
-**Features:**
-- PPTX export for PowerPoint compatibility
-- Condensed text mode for conciseness
-- Medium detail level
-- Photorealistic AI-generated images
-- Professional tone for executive audiences
-- 16x9 widescreen format
-
-### Executive Report Pattern
-
-Ideal for detailed A4 PDF reports with preserved content:
-
-```bash
-generate_gamma_presentation \
-  --input-text "<your-content>" \
-  --format document \
-  --text-mode preserve \
-  --export-as pdf \
-  --card-split auto \
-  --text-amount detailed \
-  --text-tone "professional and confident" \
-  --text-audience "executives and senior leadership" \
-  --image-source aiGenerated \
-  --image-style photorealistic \
-  --card-dimensions a4
-```
-
-**Features:**
-- PDF export for distribution
-- Preserve text mode for exact content retention
-- A4 document format for printing
-- Detailed content level
-- Automatic card splitting
-- Photorealistic images
-- Professional tone
 
 ---
 
@@ -284,76 +166,6 @@ generate_gamma_presentation \
 
 ---
 
-## Advanced Usage
-
-### Custom Header/Footer
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/presentation.md \
-  --card-header-footer '{
-    "topLeft": {"type": "image", "source": "themeLogo", "size": "sm"},
-    "bottomRight": {"type": "cardNumber"},
-    "hideFromFirstCard": true
-  }'
-```
-
-### Email Sharing
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/presentation.md \
-  --sharing-email-options '{
-    "recipients": ["stakeholder@company.com", "team@company.com"],
-    "accessLevel": "view"
-  }' \
-  --sharing-external-access "edit"
-```
-
-### Multiple Folders & Workspace Sharing
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/presentation.md \
-  --folder-ids '["folder_sales_2025", "folder_exec_updates"]' \
-  --sharing-workspace-access "fullAccess"
-```
-
-### Presentation with Custom AI Images
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/product_pitch.md \
-  --format presentation \
-  --image-source aiGenerated \
-  --image-model "dall-e-3" \
-  --image-style "minimalist, modern design, tech-focused" \
-  --text-tone "innovative and forward-thinking" \
-  --text-audience "venture capitalists and investors"
-```
-
-### Formatted Report with Instructions
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/quarterly_report.md \
-  --additional-instructions-file 99-TMP/INPUT/report_guidelines.txt \
-  --format document \
-  --card-dimensions letter \
-  --text-mode preserve \
-  --text-amount extensive \
-  --export-as pdf \
-  --card-header-footer '{
-    "topLeft": {"type": "image", "source": "themeLogo", "size": "md"},
-    "topRight": {"type": "text", "value": "Q4 2024"},
-    "bottomCenter": {"type": "cardNumber"},
-    "hideFromFirstCard": true,
-    "hideFromLastCard": true
-  }'
-```
-
----
-
 ## Environment Setup
 
 Required environment variable:
@@ -363,86 +175,34 @@ export GAMMA_API_KEY=sk-gamma-xxxxxxxx
 
 Available to: Pro, Ultra, Teams, and Business plan subscribers.
 
-### Input/Output Directories
-
-- **Input directory:** `99-TMP/INPUT/` - Place your content and instruction files here
-- **Output directory:** `99-TMP/OUTPUT/` - Downloaded presentations will be saved here
-
-All examples in this documentation use these standard directories.
-
 ---
 
-## Complete API Reference
+## Understanding `uvx --from`
 
-For detailed API documentation, supported parameters, limitations, and version info, see [references/GAMMA_API_REFERENCE.md](references/GAMMA_API_REFERENCE.md).
-
-Key points:
-- API v1.0 is GA (Generally Available)
-
----
-
-## Examples
-
-### Example 1: Quick Presentation from File
+The `uvx --from` syntax provides flexible remote execution:
 
 ```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/product_launch.md \
-  --num-cards 5 \
-  --export-as pptx
+# From GitHub (main branch)
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation ...
+
+# From specific branch
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools@develop[gamma]" generate_gamma_presentation ...
+
+# From specific tag/version
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools@v1.0.0[gamma]" generate_gamma_presentation ...
 ```
 
-### Example 2: Marketing Social Post from File
+### Available Extras
 
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/social_post.md \
-  --format social \
-  --card-dimensions "1x1" \
-  --image-source unsplash
-```
+| Extra | Dependencies | Commands |
+|-------|--------------|----------|
+| `research` | `httpx` | `research`, `poll_research`, `extract_json` |
+| `gamma` | (base only) | `generate_gamma_presentation`, `get_gamma_assets` |
+| `keep` | `gkeepapi` | `google_keep` |
+| `nanobanana` | `google-generativeai`, `pillow` | `nanobanana` |
+| `all` | All dependencies | All commands |
 
-### Example 3: Technical Documentation
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/api-docs.md \
-  --format document \
-  --card-dimensions pageless \
-  --text-language en
-```
-
-### Example 4: Presentation with Custom Instructions from File
-
-```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/presentation.md \
-  --additional-instructions-file 99-TMP/INPUT/instructions.txt \
-  --format presentation \
-  --export-as pptx \
-  --text-mode condense
-```
-
-### Example 5: Workflow - Generate Report then Download
-
-```bash
-# Generate
-RESPONSE=$(uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation \
-  --input-file 99-TMP/INPUT/sales_report.md \
-  --format document \
-  --export-as pdf)
-
-GENERATION_ID=$(echo $RESPONSE | jq -r '.generation_id')
-
-# Wait a moment for processing
-sleep 5
-
-# Download
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets \
-  --generation-id $GENERATION_ID \
-  --download \
-  --output-dir 99-TMP/OUTPUT
-```
+See [scripts/README.md](../../scripts/README.md) for full documentation on `uvx --from` options.
 
 ---
 
@@ -451,21 +211,9 @@ uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools get_gamma_assets \
 ### "Either --input-text or --input-file is required"
 Provide one of:
 ```bash
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation --input-text "Content here" ...
-
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-text "Content here" ...
 # OR
-
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation --input-file 99-TMP/INPUT/content.md ...
-```
-
-### "Error reading file"
-Ensure the file path is correct and readable:
-```bash
-# Check file exists in input directory
-ls -la 99-TMP/INPUT/content.md
-
-# Verify input directory exists
-ls -la 99-TMP/INPUT/
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-file content.md ...
 ```
 
 ### "GAMMA_API_KEY environment variable not set"
@@ -477,16 +225,10 @@ export GAMMA_API_KEY=sk-gamma-xxxxxxxx
 ### Generation returns no URL
 Use `get_gamma_assets` with the `generation_id` to check status and retrieve exports.
 
-### API Rate Limited (429 error)
-Wait and retry. Most users have generous limits (hundreds per hour).
-
-### Timeout during generation
-Large generations (60+ cards) may take longer. Poll with `get_gamma_assets` using the `generation_id`.
-
 ---
 
 ## Support
 
 - Official Docs: https://developers.gamma.app/docs
 - API Reference: https://developers.gamma.app/reference/
-- GitHub Issues: Report problems with the scripts
+- Complete API Reference: [references/GAMMA_API_REFERENCE.md](references/GAMMA_API_REFERENCE.md)

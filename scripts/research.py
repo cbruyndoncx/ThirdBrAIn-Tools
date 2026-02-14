@@ -1,9 +1,20 @@
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "httpx>=0.27.0",
+#     "python-dotenv>=1.0.0",
+# ]
+# ///
 """
 Unified Deep Research Script - Single command for all providers
 
 Usage:
-    uv run research.py "What are the latest AI breakthroughs?" --provider openai --poll
-    uv run research.py "Explain quantum computing" --provider deepseek
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "What are the latest AI breakthroughs?" --provider openai
+    uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "Explain quantum computing" --provider deepseek
+
+Alternative (direct script):
+    uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/research.py "query" --provider openai
 
 Providers:
     - openai: O1 models with background processing (auto-polls)
@@ -740,9 +751,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  uv run research.py "What is quantum computing?" --provider openai --poll
-  uv run research.py "Latest AI breakthroughs" --provider deepseek
-  uv run research.py "Explain transformers" --provider openai --model o1-mini
+  uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "What is quantum computing?" --provider openai
+  uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "Latest AI breakthroughs" --provider deepseek
         """,
     )
 
@@ -842,10 +852,10 @@ Examples:
             print("⏳ Research still in progress (background processing)", file=sys.stderr)
             print("", file=sys.stderr)
             print("To check status or retrieve results later, use:", file=sys.stderr)
-            print(f"  python3 poll_research.py {request_id}", file=sys.stderr)
+            print(f'  uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research {request_id}', file=sys.stderr)
             print("", file=sys.stderr)
             print("Or check status only:", file=sys.stderr)
-            print(f"  python3 poll_research.py {request_id} --check-only", file=sys.stderr)
+            print(f'  uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research {request_id} --check-only', file=sys.stderr)
             print("=" * 70, file=sys.stderr)
             sys.exit(0)  # Exit cleanly, not an error
         elif status == "failed":

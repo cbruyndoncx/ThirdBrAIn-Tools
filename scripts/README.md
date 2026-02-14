@@ -1,155 +1,302 @@
-# Deep Research Scripts
+# ThirdBrAIn-Tools Scripts
 
-Helper scripts for conducting comprehensive AI-powered research with OpenAI and DeepSeek.
+Helper scripts for AI-powered research, presentations, note management, and image generation.
+
+## Quick Start (Remote Execution)
+
+All scripts can be run directly from GitHub - no local installation required. Just have `uv` installed.
+
+```bash
+# Research with OpenAI
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "What are the latest AI breakthroughs?" --provider openai
+
+# Generate Gamma presentation
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-file content.md
+
+# Manage Google Keep notes
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep find "shopping list"
+
+# Generate images with Gemini
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nanobanana]" nanobanana --prompt "isometric cyberpunk office"
+```
+
+**Tip:** Add `--help` to any command to see all available options.
+
+---
+
+## Understanding `uvx --from`
+
+The `uvx --from` syntax provides flexible remote execution. Here's how it works:
+
+### Basic Format
+
+```bash
+uvx --from "PACKAGE_SOURCE[EXTRAS]" COMMAND [ARGS]
+```
+
+| Component | Description |
+|-----------|-------------|
+| `uvx` | UV's tool runner (like `npx` for Python) |
+| `--from` | Specifies where to get the package |
+| `PACKAGE_SOURCE` | Git URL, PyPI package, or local path |
+| `[EXTRAS]` | Optional dependency groups to install |
+| `COMMAND` | The script/command to run |
+| `[ARGS]` | Arguments passed to the command |
+
+### Package Sources
+
+```bash
+# From GitHub (main branch)
+uvx --from "git+https://github.com/user/repo" command
+
+# From GitHub (specific branch)
+uvx --from "git+https://github.com/user/repo@develop" command
+
+# From GitHub (specific tag/version)
+uvx --from "git+https://github.com/user/repo@v1.0.0" command
+
+# From GitHub (specific commit)
+uvx --from "git+https://github.com/user/repo@abc123def" command
+
+# From PyPI
+uvx --from "package-name" command
+
+# From PyPI (specific version)
+uvx --from "package-name==1.2.3" command
+```
+
+### Optional Extras (Dependency Groups)
+
+Extras let you install only the dependencies you need:
+
+```bash
+# Install with "research" extras (includes httpx)
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "query"
+
+# Install with "keep" extras (includes gkeepapi)
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep find "notes"
+
+# Install with multiple extras
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research,gamma]" research "query"
+
+# Install all extras
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[all]" research "query"
+```
+
+### Available Extras for ThirdBrAIn-Tools
+
+| Extra | Dependencies | Commands |
+|-------|--------------|----------|
+| `research` | `httpx` | `research`, `poll_research`, `extract_json` |
+| `gamma` | (base only) | `generate_gamma_presentation`, `get_gamma_assets` |
+| `keep` | `gkeepapi` | `google_keep` |
+| `nanobanana` | `google-generativeai`, `pillow` | `nanobanana` |
+| `all` | All dependencies | All commands |
+
+### Documentation
+
+- [uv Tools Guide](https://docs.astral.sh/uv/guides/tools/) - Official `uvx` documentation
+- [uv Git Dependencies](https://docs.astral.sh/uv/pip/packages/#git) - Git URL formats
+
+---
 
 ## Scripts Overview
 
-**Tip:** add `--help` to any helper (`research.py`, `poll_research.py`, `generate_gamma_presentation.py`, `get_gamma_assets.py`) to see the full list of arguments and their explanations before running.
+### Research Scripts
 
-### 1. `research.py` - Main Research Script
+#### `research` - Unified Deep Research
 
-Primary script for creating and managing deep research requests.
+Primary script for AI-powered research with OpenAI and DeepSeek.
 
-**Quick Start:**
 ```bash
-# With polling (waits for completion)
-python3 research.py --query-file query.md --provider openai --poll
+# OpenAI deep research
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "What is quantum computing?" --provider openai
 
-# Without polling (returns request ID immediately)
-python3 research.py --query-file query.md --provider openai
+# DeepSeek reasoning
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "Explain transformers" --provider deepseek
+
+# From file with custom output
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research --query-file query.md --output report.md --provider openai
 ```
 
-**Load credentials from elsewhere:** use `--env-file /path/to/.env` when running from a different directory so `OPENAI_API_KEY`/`DEEPSEEK_API_KEY` load regardless of your CWD.
-
-**Key Features:**
+**Features:**
 - Supports OpenAI and DeepSeek providers
 - Adaptive polling intervals (10s → 30s → 1m → 5m)
 - Auto-saves both raw JSON and extracted markdown
-- Displays prominent request ID for reconnection
-- Handles background processing
+- YAML frontmatter with metadata
 
-### 2. `poll_research.py` - Polling & Reconnection Script
+#### `poll_research` - Reconnect to Research Jobs
 
-**NEW:** Reconnect to long-running research jobs and retrieve results.
+Reconnect to long-running research jobs and retrieve results.
 
-**Quick Start:**
 ```bash
 # Poll and retrieve results
-python3 poll_research.py resp_abc123def456
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123
 
-# Just check status
-python3 poll_research.py resp_abc123def456 --check-only
+# Check status only
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123 --check-only
 
-# Poll with custom timeout (1 hour)
-python3 poll_research.py resp_abc123def456 --timeout 3600
+# Custom timeout (1 hour)
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123 --timeout 3600
 ```
 
-**Load credentials from elsewhere:** add `--env-file /path/to/.env` so `OPENAI_API_KEY` is read even if the script is executed from outside the repo.
+#### `extract_json` - JSON Extraction Helper
 
-**Use Cases:**
-- Reconnect after disconnection
-- Check status of background research
-- Retrieve results when convenient
-- Custom timeout for very long research
+Extract markdown from OpenAI's nested JSON response.
 
-**Key Features:**
-- Adaptive polling like research.py
-- Saves both raw JSON and markdown
-- Shows character count and file locations
-- Supports custom timeouts
-- Status-only checking mode
-
-### 3. `extract_json.py` - JSON Extraction Helper
-
-Extract markdown content from OpenAI's nested JSON response structure.
-
-**Quick Start:**
 ```bash
-python3 extract_json.py input.json output.md
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" extract_json input.json output.md
 ```
 
-**Use Cases:**
-- Extract markdown from saved raw JSON
-- Re-process OpenAI responses
-- Debugging response structure issues
+### Gamma Scripts
 
-**How It Works:**
-```python
-# Navigates nested structure:
-response.output[]
-  -> type="message"
-    -> content[]
-      -> type="output_text"
-        -> text (markdown content)
+#### `generate_gamma_presentation` - Create Presentations
+
+Generate presentations, documents, and more using Gamma API.
+
+```bash
+# From text
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-text "Your content here"
+
+# From file
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-file content.md --format presentation
 ```
+
+#### `get_gamma_assets` - Download Exports
+
+Retrieve and download presentation exports (PDF, PPTX).
+
+```bash
+# Get URLs
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets --generation-id abc123
+
+# Download files
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets --generation-id abc123 --download --output-dir ./exports
+```
+
+### Google Keep
+
+#### `google_keep` - Manage Notes
+
+CLI for managing Google Keep notes.
+
+```bash
+# Search notes
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep find "shopping list"
+
+# Create note
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep create --title "New Note" --text "Content here"
+
+# Update note
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep update <note_id> --title "Updated Title"
+
+# Delete note
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep delete <note_id>
+
+# List labels
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep labels
+```
+
+### Image Generation
+
+#### `nanobanana` - Gemini Image Generation
+
+Generate and edit images with Google Gemini.
+
+```bash
+# Generate image
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nanobanana]" nanobanana --prompt "isometric cyberpunk office" --size 1024x1024
+
+# Edit existing image
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nanobanana]" nanobanana --prompt "add a cat" --input photo.jpg --output edited.png
+```
+
+---
+
+## Environment Variables
+
+Set these in your shell or `.env` file:
+
+```bash
+# Research
+export OPENAI_API_KEY="your-key"
+export DEEPSEEK_API_KEY="your-key"
+
+# Gamma
+export GAMMA_API_KEY="your-key"
+
+# Google Keep
+export GOOGLE_EMAIL="your-email"
+export GOOGLE_MASTER_TOKEN="your-token"
+
+# NanoBanana
+export GEMINI_API_KEY="your-key"
+```
+
+**Loading from custom .env file:**
+
+All scripts support `--env-file /path/to/.env` to load credentials from a specific location.
+
+---
+
+## Alternative: Direct Script Execution
+
+If you prefer running scripts directly (without package installation):
+
+```bash
+uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/research.py "query" --provider openai
+```
+
+This method uses PEP 723 inline metadata - dependencies are resolved automatically.
+
+---
 
 ## Common Workflows
 
-### Workflow 1: Wait for Completion
-
-**Best for:** Short research tasks or when you can wait
+### Workflow 1: Quick Research (Wait for Completion)
 
 ```bash
-python3 research.py \
-  --query-file 99-TMP/INPUT/query.md \
-  --output 99-TMP/OUTPUT/result.md \
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research \
+  --query-file query.md \
+  --output result.md \
   --provider openai \
-  --poll \
   --verbose
 ```
 
-**Result:**
-- Markdown saved to: `99-TMP/OUTPUT/result_260111_1430.md` (with frontmatter, timestamp appended)
-- Raw JSON saved to: `99-TMP/OUTPUT/result_260111_1430-raw.json` (timestamp appended)
-
-### Workflow 2: Submit and Reconnect
-
-**Best for:** Long research, disconnection risk, background processing
+### Workflow 2: Submit and Reconnect Later
 
 **Step 1: Submit**
 ```bash
-python3 research.py --query-file query.md --provider openai
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research --query-file query.md --provider openai
+# Note the Request ID displayed
 ```
 
-**Output:**
-```
-======================================================================
-✓ Request created successfully!
-  Request ID: resp_060d0cafcee3c1b4006962dad3910c81a2adbb24abaa24a49b
-======================================================================
-```
-
-**Step 2: Check Status (anytime)**
+**Step 2: Check status (anytime)**
 ```bash
-python3 poll_research.py resp_060d0cafcee3... --check-only
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123 --check-only
 ```
 
-**Step 3: Retrieve (when ready)**
+**Step 3: Retrieve results**
 ```bash
-python3 poll_research.py resp_060d0cafcee3... --output result.md --verbose
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" poll_research resp_abc123 --output report.md
 ```
 
-### Workflow 3: Manual Status Check
-
-Use curl for direct API access:
+### Workflow 3: Research to Presentation Pipeline
 
 ```bash
-curl -X GET "https://api.openai.com/v1/responses/REQUEST_ID" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" | jq
+# 1. Research a topic
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[research]" research "AI trends 2026" --provider openai --output research.md
+
+# 2. Generate presentation from research
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate_gamma_presentation --input-file research.md --format presentation
+
+# 3. Download the presentation
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" get_gamma_assets --generation-id <ID> --download
 ```
 
-## File Organization
+---
 
-**Typical output structure:**
-
-```
-99-TMP/
-├── INPUT/
-│   └── company-research-query.md                    # Your research query
-└── OUTPUT/
-    ├── openai_o4-mini-deep-research_260111_1430.md         # Extracted markdown with frontmatter
-    └── openai_o4-mini-deep-research_260111_1430-raw.json   # Raw API response
-```
+## Output Files
 
 **Filename format:**
 - `{provider}_{model}_{timestamp}.md` - Markdown report with YAML frontmatter
@@ -166,147 +313,22 @@ timestamp: 260111_1430
 ---
 ```
 
-## Prerequisites
-
-**Python Packages:**
-```bash
-pip3 install httpx openai python-dotenv --break-system-packages
-```
-
-**Environment Variables:**
-```bash
-export OPENAI_API_KEY="your-key-here"
-export DEEPSEEK_API_KEY="your-key-here"  # If using DeepSeek
-```
-
-## Tips & Best Practices
-
-### When to Use Each Script
-
-| Scenario | Use |
-|----------|-----|
-| Quick research (< 5 min) | `research.py --poll` |
-| Long research (10-30 min) | `research.py` then `poll_research.py` |
-| Unstable connection | `research.py` then `poll_research.py` |
-| Need to disconnect | `research.py` then `poll_research.py` later |
-| Check job status | `poll_research.py --check-only` |
-| Re-extract from JSON | `extract_json.py` |
-
-### Timeout Strategies
-
-**Default (30 min):**
-```bash
-python3 poll_research.py REQUEST_ID
-```
-
-**Extended (1 hour):**
-```bash
-python3 poll_research.py REQUEST_ID --timeout 3600
-```
-
-**Very long (2 hours):**
-```bash
-python3 poll_research.py REQUEST_ID --timeout 7200
-```
-
-### Error Recovery
-
-**If polling times out:**
-```bash
-# Just run poll_research.py again - it picks up where it left off
-python3 poll_research.py REQUEST_ID --timeout 3600
-```
-
-**If you lose the request ID:**
-- Check stderr output (if you saved it)
-- Look for recent `-raw.json` files in `99-TMP/OUTPUT/`
-- Open any raw JSON file and find the `"id"` field at the top level
-- Or check the markdown frontmatter for the `request_id` field
-
-**If JSON extraction fails:**
-```bash
-# Manually extract with the helper script
-python3 extract_json.py OUTPUT/file-raw.json OUTPUT/file.md
-```
-
-## Output Files
-
-### Raw JSON (`-raw.json`)
-
-Contains the complete OpenAI API response:
-- Full output array with reasoning, web searches, and final message
-- Metadata (model, status, timing, etc.)
-- Useful for debugging or re-processing
-
-### Markdown (`.md`)
-
-Extracted final report with YAML frontmatter:
-- YAML frontmatter includes provider, model, request_id, and timestamp
-- Clean markdown content from `output_text` field
-- Ready for delivery or further processing
-- Frontmatter is compatible with Obsidian and other markdown tools
-
-## Advanced Usage
-
-### Custom Output Locations
-
-```bash
-python3 research.py \
-  --query-file query.md \
-  --output /custom/path/report.md \
-  --poll
-```
-
-**Creates:**
-- `/custom/path/report_260111_1430.md` (markdown with timestamp appended)
-- `/custom/path/report_260111_1430-raw.json` (JSON with timestamp appended)
-
-**Note:** When using `--output`, the timestamp is automatically appended to your specified filename, and provider/model metadata is added to the frontmatter.
-
-### Verbose Polling
-
-See every poll attempt:
-
-```bash
-python3 poll_research.py REQUEST_ID --verbose
-```
-
-**Output:**
-```
-[Poll 1] Status: in_progress (elapsed: 0m10s, timeout: 29m50s)
-[Poll 2] Status: in_progress (elapsed: 0m40s, timeout: 29m20s)
-[Poll 3] Status: in_progress (elapsed: 1m40s, timeout: 28m20s)
-...
-```
-
-### Background Processing
-
-Run research in background, check later:
-
-```bash
-# Submit and go do something else
-python3 research.py --query-file query.md --provider openai > request_id.txt 2>&1
-
-# Come back later and poll
-REQUEST_ID=$(grep "Request ID:" request_id.txt | cut -d: -f2 | tr -d ' ')
-python3 poll_research.py $REQUEST_ID --output final-report.md
-```
-
-## Gamma helpers
-
-`generate_gamma_presentation.py` and `get_gamma_assets.py` now accept `--env-file /path/to/.env` so they can pick up `GAMMA_API_KEY` even when you execute the helpers outside the repository root.
+---
 
 ## Troubleshooting
 
-See the main [SKILL.md](../SKILL.md) for detailed troubleshooting section.
-
 **Common issues:**
-- cmd.exe errors in WSL → Use full paths (`/usr/bin/python3`)
-- Missing modules → `pip3 install httpx openai python-dotenv --break-system-packages`
-- Timeout → Increase with `--timeout` or run `poll_research.py` again
-- Empty extraction → Check JSON structure with `extract_json.py`
+
+| Issue | Solution |
+|-------|----------|
+| Missing API key | Set environment variable or use `--env-file` |
+| Timeout | Increase with `--timeout` or run `poll_research` again |
+| Lost request ID | Check `-raw.json` files for `"id"` field |
+| cmd.exe errors in WSL | Use full paths (`/usr/bin/python3`) |
+
+---
 
 ## See Also
 
-- [Main Skill Documentation](../SKILL.md) - Complete deep-research skill guide
-- [GitHub Repository](https://github.com/cbruyndoncx/ThirdBrAIn-Tools/tree/main/agentskills/deep-research) - Latest versions
+- [AGENTS.md](../AGENTS.md) - Complete skill documentation
+- [uv Documentation](https://docs.astral.sh/uv/) - Package manager docs

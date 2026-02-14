@@ -4,7 +4,12 @@ This file documents all Claude Code skills and agents available in this reposito
 
 ## Project Overview
 
-ThirdBrAIn-Tools is a repository for building reusable Claude Code skills. Currently, it contains the **deep-research** skill, which provides unified deep research capabilities across multiple AI providers (OpenAI and DeepSeek).
+ThirdBrAIn-Tools is a repository for building reusable Claude Code skills. Currently available skills:
+
+- **deep-research** - Unified deep research across multiple AI providers (OpenAI and DeepSeek)
+- **google-keep** - Google Keep note management CLI (search, create, update, delete notes)
+- **gamma** - Presentation generation via Gamma API
+- **notion** - Comprehensive Notion API CLI (pages, databases, todos, blocks, search)
 
 ## Available Skills
 
@@ -69,6 +74,124 @@ uvx --from ~/.claude/skills/deep-research research "What is quantum computing?" 
 | OpenAI | Slower 🔄 | Higher 💸 | o1 | Async (requires polling) |
 
 See `agentskills/deep-research/SKILL.md` for complete documentation, examples, and troubleshooting.
+
+---
+
+### google-keep
+
+**Manage Google Keep notes from the command line.**
+
+Search, create, update, and delete notes with full JSON output. Built as a single-file UV script with inline dependencies.
+
+- **Skill Name:** `google-keep`
+- **Location:** `agentskills/google-keep/`
+- **Script:** `scripts/google_keep.py`
+- **Files:**
+  - `SKILL.md` - Full skill documentation and usage guide
+  - `scripts/google_keep.py` - Single-file UV script implementation
+
+**Quick Start:**
+```bash
+# Set credentials
+export GOOGLE_EMAIL="your-email@gmail.com"
+export GOOGLE_MASTER_TOKEN="your-master-token"
+
+# Search notes
+uv run scripts/google_keep.py find "shopping"
+
+# Create a note
+uv run scripts/google_keep.py create --title "New Note" --text "Content"
+
+# Get, update, delete
+uv run scripts/google_keep.py get <note_id>
+uv run scripts/google_keep.py update <note_id> --title "Updated"
+uv run scripts/google_keep.py delete <note_id>
+```
+
+**Command Reference:**
+
+| Command | Purpose |
+|---------|---------|
+| `find [query]` | Search notes |
+| `get <id>` | Get note by ID |
+| `create --title --text` | Create new note |
+| `update <id> --title/--text` | Update note |
+| `delete <id>` | Delete (trash) note |
+| `labels` | List all labels |
+
+**Key Options:**
+
+| Option | Purpose |
+|--------|---------|
+| `--env-file` | Custom .env file path |
+| `--pinned` | Pin note / filter pinned |
+| `--archived` | Archive note / include archived |
+| `--color` | Set note color |
+| `--limit N` | Limit search results |
+
+See `agentskills/google-keep/SKILL.md` for complete documentation, token setup, and troubleshooting.
+
+---
+
+### notion
+
+**Comprehensive Notion API CLI - pages, databases, todos, blocks, and search.**
+
+Single-file standalone CLI with 100% Notion API coverage, smart caching, and path-based navigation. Built as a PEP 723 UV script.
+
+- **Skill Name:** `notion`
+- **Location:** `agentskills/notion/`
+- **Script:** `scripts/notion.py`
+- **Files:**
+  - `SKILL.md` - Full skill documentation and command reference
+  - `scripts/notion.py` - Single-file UV script (~2,260 lines)
+
+**Quick Start:**
+```bash
+# Set API key
+export NOTION_API_KEY="ntn_your_integration_token_here"
+
+# Verify connection
+uv run scripts/notion.py verify-connection
+
+# List pages, search, add content
+uv run scripts/notion.py list pages
+uv run scripts/notion.py search "project"
+uv run scripts/notion.py add page --title "Notes" --parent "Work"
+```
+
+**Command Reference:**
+
+| Command | Purpose |
+|---------|---------|
+| `verify-connection` | Test API connectivity |
+| `check-config` | Show environment configuration |
+| `search "query"` | Search Notion content |
+| `list pages/databases` | List all pages or databases |
+| `add page/database/todo` | Create pages, databases, or todos |
+| `get page/database/block` | Retrieve by name/path or ID |
+| `update page/database/block` | Update properties or content |
+| `delete page/block` | Archive pages or delete blocks |
+| `move page` | Move page to new parent |
+| `query database` | Query with filters and sorts |
+| `todos search` | Search todos with filter shortcuts |
+| `blocks add/list/delete` | Manage 30+ block types |
+| `blocks subtasks` | Add/list/check subtasks |
+| `refresh-cache` | Refresh name-to-ID cache |
+
+**Key Features:**
+
+| Feature | Description |
+|---------|-------------|
+| Path navigation | Use `"Parent/Child"` names instead of UUIDs |
+| Smart caching | Auto-caching with 24h refresh at `~/.cache/notion-cli/` |
+| Database templates | `--template tasks\|notes\|contacts` |
+| Filter shortcuts | `--status`, `--priority`, `--due-before` |
+| JSON output | All commands return JSON |
+
+See `agentskills/notion/SKILL.md` for complete documentation and command examples.
+
+---
 
 ## Architecture: Claude Code Skills
 
@@ -149,18 +272,28 @@ This maps `uvx --from ~/.claude/skills/skill-name skill-command` to the `main()`
 ```
 ThirdBrAIn-Tools/
 ├── agentskills/               # Container for all Claude Code skills
-│   └── deep-research/         # Deep research skill
-│       ├── src/
-│       │   └── deep_research/
-│       │       ├── research.py           # Entry point
-│       │       ├── providers/
-│       │       │   ├── openai.py
-│       │       │   └── deepseek.py
-│       │       └── shared/
-│       │           ├── base.py           # Abstract provider
-│       │           └── utils.py
-│       ├── pyproject.toml
+│   ├── deep-research/         # Deep research skill
+│   │   ├── src/
+│   │   │   └── deep_research/
+│   │   │       ├── research.py           # Entry point
+│   │   │       ├── providers/
+│   │   │       │   ├── openai.py
+│   │   │       │   └── deepseek.py
+│   │   │       └── shared/
+│   │   │           ├── base.py           # Abstract provider
+│   │   │           └── utils.py
+│   │   ├── pyproject.toml
+│   │   └── SKILL.md
+│   ├── google-keep/           # Google Keep skill
+│   │   └── SKILL.md
+│   └── notion/                # Notion API CLI skill
 │       └── SKILL.md
+├── scripts/                   # Standalone UV scripts
+│   ├── google_keep.py         # Google Keep CLI (single-file UV script)
+│   ├── notion.py              # Notion API CLI (single-file UV script)
+│   ├── research.py
+│   ├── generate_gamma_presentation.py
+│   └── get_gamma_assets.py
 ├── AGENTS.md                  # This file (single source of truth)
 ├── CLAUDE.md                  # General guidance (references this file)
 └── README.md
@@ -168,7 +301,11 @@ ThirdBrAIn-Tools/
 
 ## Key Dependencies
 
-- **httpx** - HTTP client for API calls (used by deep-research)
+- **httpx** - HTTP client for API calls (used by deep-research, notion)
+- **click** - CLI framework (used by notion)
+- **structlog** - Structured logging (used by notion)
+- **gkeepapi** - Google Keep API client (used by google-keep)
+- **python-dotenv** - Environment variable loading
 - **setuptools** - Python packaging
 - **uv/uvx** - Fast Python package installer and script runner (required for skill execution)
 - **pytest** - Testing (optional, for development)

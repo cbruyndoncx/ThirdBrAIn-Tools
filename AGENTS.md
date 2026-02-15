@@ -10,6 +10,7 @@ ThirdBrAIn-Tools is a repository for building reusable Claude Code skills. Curre
 - **google-keep** - Google Keep note management CLI (search, create, update, delete notes)
 - **gamma** - Presentation generation via Gamma API
 - **notion** - Comprehensive Notion API CLI (pages, databases, todos, blocks, search)
+- **notebooklm-pdf2ppt** - Convert NotebookLM PDF exports to PowerPoint with vector graphics and watermark removal
 
 ## Available Skills
 
@@ -193,6 +194,60 @@ See `agentskills/notion/SKILL.md` for complete documentation and command example
 
 ---
 
+### notebooklm-pdf2ppt
+
+**Convert NotebookLM PDF slide exports to PowerPoint with vector graphics quality.**
+
+Single-file UV script using a PDF → SVG → EMF → PPTX pipeline. Preserves vector graphics, removes NotebookLM watermarks, supports batch conversion and parallel processing.
+
+- **Skill Name:** `notebooklm-pdf2ppt`
+- **Location:** `agentskills/notebooklm-pdf2ppt/`
+- **Script:** `scripts/pdf2ppt.py`
+- **Files:**
+  - `SKILL.md` - Full skill documentation and usage guide
+  - `scripts/pdf2ppt.py` - Single-file UV script (PEP 723 inline dependencies)
+
+**System Dependencies:** Requires `pdf2svg` and `inkscape` installed on the system.
+
+**Quick Start:**
+```bash
+# Check system dependencies
+uv run scripts/pdf2ppt.py --check-deps
+
+# Install if needed (Ubuntu/Debian)
+sudo apt install pdf2svg inkscape
+
+# Convert with watermark removal
+uv run scripts/pdf2ppt.py input.pdf --remove-watermark --force
+
+# Batch convert
+for f in *.pdf; do uv run scripts/pdf2ppt.py "$f" --rw --force -j 4; done
+```
+
+**Command Reference:**
+
+| Command | Purpose |
+|---------|---------|
+| `--check-deps` | Check system dependencies (JSON output) |
+| `--remove-watermark` / `--rw` | Remove NotebookLM watermark |
+| `--pages 1-5,7` | Convert specific pages |
+| `--parallel 4` / `-j 4` | Parallel SVG→EMF workers |
+| `--force` / `-f` | Overwrite existing output |
+
+**Exit Codes:**
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Generic error |
+| 2 | Missing system dependencies |
+| 101 | PDF→SVG failure |
+| 102 | SVG→EMF failure |
+
+See `agentskills/notebooklm-pdf2ppt/SKILL.md` for complete documentation.
+
+---
+
 ## Architecture: Claude Code Skills
 
 ### Skill Structure
@@ -286,11 +341,14 @@ ThirdBrAIn-Tools/
 │   │   └── SKILL.md
 │   ├── google-keep/           # Google Keep skill
 │   │   └── SKILL.md
-│   └── notion/                # Notion API CLI skill
+│   ├── notion/                # Notion API CLI skill
+│   │   └── SKILL.md
+│   └── notebooklm-pdf2ppt/   # NotebookLM PDF to PowerPoint skill
 │       └── SKILL.md
 ├── scripts/                   # Standalone UV scripts
 │   ├── google_keep.py         # Google Keep CLI (single-file UV script)
 │   ├── notion.py              # Notion API CLI (single-file UV script)
+│   ├── pdf2ppt.py             # NotebookLM PDF to PPTX (single-file UV script)
 │   ├── research.py
 │   ├── generate_gamma_presentation.py
 │   └── get_gamma_assets.py

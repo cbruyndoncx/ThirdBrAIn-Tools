@@ -11,11 +11,16 @@ Generate publication-quality academic illustrations using a multi-agent Gemini p
 
 **Direct script:**
 ```bash
-python scripts/paperbanana_lite.py generate --input methodology.txt --caption "Overview of our architecture"
+# Download reference dataset (one-time setup, or done automatically on first run)
+uv run scripts/paperbanana_lite.py setup
+
+# Generate a diagram
+uv run scripts/paperbanana_lite.py generate --input methodology.txt --caption "Overview of our architecture"
 ```
 
 **Via uv run from GitHub:**
 ```bash
+uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/paperbanana_lite.py setup
 uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/paperbanana_lite.py generate --input methodology.txt --caption "Overview"
 ```
 
@@ -24,20 +29,18 @@ uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scrip
 ### Generate a methodology diagram
 
 ```bash
-python scripts/paperbanana_lite.py generate \
+uv run scripts/paperbanana_lite.py generate \
   --input methodology.txt \
   --caption "Overview of our encoder-decoder architecture" \
-  --reference-dir path/to/references \
   --iterations 3
 ```
 
 ### Generate a statistical plot
 
 ```bash
-python scripts/paperbanana_lite.py plot \
+uv run scripts/paperbanana_lite.py plot \
   --data results.json \
   --intent "Bar chart comparing model accuracy" \
-  --reference-dir path/to/references \
   --iterations 3
 ```
 
@@ -61,6 +64,20 @@ Also accepts `GOOGLE_API_KEY` as fallback. Dependencies: `pip install google-gen
 5. **Critic** — evaluates quality, provides revision feedback; loops back to step 4
 
 ## CLI Options
+
+### `setup` (download references)
+
+Downloads the curated reference dataset (~937 KB) from GitHub to a local cache. This is optional — references are fetched automatically on first `generate` or `plot` run if not already present.
+
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `--target-dir` | No | `~/.paperbanana/reference_sets` | Where to store references |
+
+Reference lookup order during generation:
+1. `--reference-dir` if explicitly provided
+2. `data/reference_sets` (local repo directory)
+3. `~/.paperbanana/reference_sets` (shared cache)
+4. Auto-downloads from GitHub if none found
 
 ### `generate` (methodology diagrams)
 
@@ -93,6 +110,16 @@ Results saved to `outputs/run_<timestamp>/`:
 
 ## Reference Sets
 
-The `--reference-dir` must contain an `index.json` with curated examples. Each example needs: `id`, `source_context`, `caption`, `image_path`. The full PaperBanana repo ships 13 examples at `data/reference_sets/`.
+References are automatically downloaded from GitHub on first use. You can also manually set up references:
+
+```bash
+# Explicit setup to default cache (~/.paperbanana/reference_sets)
+uv run scripts/paperbanana_lite.py setup
+
+# Setup to a custom location
+uv run scripts/paperbanana_lite.py setup --target-dir ./my-references
+```
+
+For custom reference sets, the `--reference-dir` must contain an `index.json` with curated examples. Each example needs: `id`, `source_context`, `caption`, `image_path`. The full PaperBanana repo ships 13 examples at `data/reference_sets/`.
 
 See [scripts/README.md](../../scripts/README.md) for full documentation on running scripts.

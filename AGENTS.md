@@ -11,6 +11,7 @@ ThirdBrAIn-Tools is a repository for building reusable Claude Code skills. Curre
 - **gamma** - Presentation generation via Gamma API
 - **notion** - Comprehensive Notion API CLI (pages, databases, todos, blocks, search)
 - **notebooklm-pdf2ppt** - Convert NotebookLM PDF exports to PowerPoint with vector graphics and watermark removal
+- **paperbanana-lite** - Generate publication-quality academic diagrams and plots via multi-agent Gemini pipeline
 
 ## Available Skills
 
@@ -248,6 +249,59 @@ See `agentskills/notebooklm-pdf2ppt/SKILL.md` for complete documentation.
 
 ---
 
+### paperbanana-lite
+
+**Generate publication-quality academic diagrams and statistical plots from text.**
+
+Multi-agent Gemini pipeline (Retriever → Planner → Stylist → Visualizer ↔ Critic) distilled into a single-file script. Supports methodology diagrams via image generation and statistical plots via matplotlib code execution.
+
+- **Skill Name:** `paperbanana-lite`
+- **Location:** `agentskills/paperbanana-lite/`
+- **Script:** `scripts/paperbanana_lite.py`
+- **Files:**
+  - `SKILL.md` - Full skill documentation and usage guide
+  - `scripts/paperbanana_lite.py` - Single-file pipeline script
+
+**Quick Start:**
+```bash
+# Set API key
+export GEMINI_API_KEY="your-key"
+
+# Install dependencies
+pip install google-genai pillow tenacity
+
+# Generate a methodology diagram
+python scripts/paperbanana_lite.py generate \
+  --input methodology.txt \
+  --caption "Overview of our architecture" \
+  --reference-dir path/to/references
+
+# Generate a statistical plot
+python scripts/paperbanana_lite.py plot \
+  --data results.json \
+  --intent "Bar chart comparing accuracy" \
+  --reference-dir path/to/references
+```
+
+**Command Reference:**
+
+| Command | Purpose |
+|---------|---------|
+| `generate --input FILE --caption TEXT` | Generate methodology diagram |
+| `plot --data FILE --intent TEXT` | Generate statistical plot |
+
+**Key Options:**
+
+| Option | Purpose | Default |
+|--------|---------|---------|
+| `--reference-dir PATH` | Reference set directory | `data/reference_sets` |
+| `--iterations N` | Refinement iterations | 3 |
+| `--output-dir PATH` | Output directory | `outputs` |
+
+See `agentskills/paperbanana-lite/SKILL.md` for complete documentation.
+
+---
+
 ## Architecture: Claude Code Skills
 
 ### Skill Structure
@@ -343,12 +397,15 @@ ThirdBrAIn-Tools/
 │   │   └── SKILL.md
 │   ├── notion/                # Notion API CLI skill
 │   │   └── SKILL.md
-│   └── notebooklm-pdf2ppt/   # NotebookLM PDF to PowerPoint skill
+│   ├── notebooklm-pdf2ppt/   # NotebookLM PDF to PowerPoint skill
+│   │   └── SKILL.md
+│   └── paperbanana-lite/     # Academic diagram/plot generation skill
 │       └── SKILL.md
 ├── scripts/                   # Standalone UV scripts
 │   ├── google_keep.py         # Google Keep CLI (single-file UV script)
 │   ├── notion.py              # Notion API CLI (single-file UV script)
 │   ├── pdf2ppt.py             # NotebookLM PDF to PPTX (single-file UV script)
+│   ├── paperbanana_lite.py    # Academic illustration pipeline (single-file)
 │   ├── research.py
 │   ├── generate_gamma_presentation.py
 │   └── get_gamma_assets.py
@@ -362,6 +419,8 @@ ThirdBrAIn-Tools/
 - **httpx** - HTTP client for API calls (used by deep-research, notion)
 - **click** - CLI framework (used by notion)
 - **structlog** - Structured logging (used by notion)
+- **google-genai** - Google Gemini SDK (used by paperbanana-lite)
+- **tenacity** - Retry with exponential backoff (used by paperbanana-lite)
 - **gkeepapi** - Google Keep API client (used by google-keep)
 - **python-dotenv** - Environment variable loading
 - **setuptools** - Python packaging

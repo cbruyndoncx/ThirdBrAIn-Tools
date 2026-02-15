@@ -1,12 +1,23 @@
-#!/usr/bin/env python3
-"""PaperBanana Lite — single-file academic illustration generation pipeline.
+#!/usr/bin/env -S uv run --quiet --script
 
-Generates publication-quality methodology diagrams and statistical plots
-from text descriptions using Google Gemini. Collapses the full multi-agent
-PaperBanana framework into one executable script.
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#   "google-genai",
+#   "pillow",
+#   "tenacity",
+# ]
+# ///
 
-Dependencies: google-genai, pillow, tenacity
-Usage: python paperbanana_lite.py --help
+"""
+PaperBanana Lite: Multi-agent academic illustration generation for ThirdBrAIn-Tools.
+
+Usage:
+    uv run scripts/paperbanana_lite.py generate --input methodology.txt --caption "Overview"
+    uv run scripts/paperbanana_lite.py plot --data results.json --intent "Bar chart"
+
+Alternative (direct from GitHub):
+    uv run https://raw.githubusercontent.com/cbruyndoncx/ThirdBrAIn-Tools/main/scripts/paperbanana_lite.py generate --help
 """
 
 import argparse

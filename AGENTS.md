@@ -11,6 +11,7 @@ ThirdBrAIn-Tools is a repository for building reusable Claude Code skills. Curre
 - **gamma** - Presentation generation via Gamma API
 - **notion** - Comprehensive Notion API CLI (pages, databases, todos, blocks, search)
 - **notebooklm-pdf2ppt** - Convert NotebookLM PDF exports to PowerPoint with vector graphics and watermark removal
+- **nano-banana-images** - Gemini image generation, style extraction, and style library management
 - **paperbanana-lite** - Generate publication-quality academic diagrams and plots via multi-agent Gemini pipeline
 
 ## Available Skills
@@ -132,6 +133,59 @@ uv run scripts/google_keep.py delete <note_id>
 | `--limit N` | Limit search results |
 
 See `agentskills/google-keep/SKILL.md` for complete documentation, token setup, and troubleshooting.
+
+---
+
+### nano-banana-images
+
+**Gemini image generation, style extraction, and style library management.**
+
+Single-file module for generating and editing images with Google Gemini (Pro, Flash, Imagen). Supports multi-turn sessions, style extraction from existing images, and a browseable style library.
+
+- **Skill Name:** `nano-banana-images`
+- **Location:** `agentskills/nano-banana-images/`
+- **Script:** `scripts/nano_banana.py`
+- **Files:**
+  - `SKILL.md` - Full skill documentation and usage guide
+  - `references/` - Prompting rules, API basics, style library docs
+  - `scripts/nano_banana.py` - Single-file UV script (PEP 723 inline dependencies)
+
+**Quick Start:**
+```bash
+# Set API key
+export GEMINI_API_KEY="your-key"
+
+# Generate an image
+uv run scripts/nano_banana.py generate "a banana on a beach chair"
+
+# Extract style from an image
+uv run scripts/nano_banana.py extract path/to/image.png
+
+# List available models
+uv run scripts/nano_banana.py models
+```
+
+**Command Reference:**
+
+| Command | Purpose |
+|---------|---------|
+| `generate "prompt"` | Generate image from text prompt |
+| `extract path/to/image.png` | Extract style description from image |
+| `models` | List available models |
+| `styles --list` | List saved styles |
+| `styles N` | Get style by number |
+| `session` | Show current session info |
+| `revert` | Undo last iteration |
+
+**Key Options:**
+
+| Option | Purpose | Default |
+|--------|---------|---------|
+| `--model MODEL` | Specific model | `gemini-3-pro-image-preview` |
+| `--aspect-ratio RATIO` | Aspect ratio | `1:1` |
+| `--resolution RES` | Resolution tier (1K/2K/4K) | `1K` |
+
+See `agentskills/nano-banana-images/SKILL.md` for complete documentation.
 
 ---
 
@@ -395,6 +449,9 @@ ThirdBrAIn-Tools/
 │   │   └── SKILL.md
 │   ├── google-keep/           # Google Keep skill
 │   │   └── SKILL.md
+│   ├── nano-banana-images/    # Gemini image generation skill
+│   │   ├── SKILL.md
+│   │   └── references/
 │   ├── notion/                # Notion API CLI skill
 │   │   └── SKILL.md
 │   ├── notebooklm-pdf2ppt/   # NotebookLM PDF to PowerPoint skill
@@ -403,6 +460,7 @@ ThirdBrAIn-Tools/
 │       └── SKILL.md
 ├── scripts/                   # Standalone UV scripts
 │   ├── google_keep.py         # Google Keep CLI (single-file UV script)
+│   ├── nano_banana.py         # Gemini image generation (single-file UV script)
 │   ├── notion.py              # Notion API CLI (single-file UV script)
 │   ├── pdf2ppt.py             # NotebookLM PDF to PPTX (single-file UV script)
 │   ├── paperbanana_lite.py    # Academic illustration pipeline (single-file)

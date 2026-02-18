@@ -17,7 +17,7 @@ uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[gamma]" generate
 uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_keep find "shopping list"
 
 # Generate images with Gemini
-uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nanobanana]" nanobanana --prompt "isometric cyberpunk office"
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nano-banana-images]" nano-banana-images --prompt "isometric cyberpunk office"
 ```
 
 **Tip:** Add `--help` to any command to see all available options.
@@ -90,7 +90,7 @@ uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[all]" research "
 | `research` | `httpx` | `research`, `poll_research`, `extract_json` |
 | `gamma` | (base only) | `generate_gamma_presentation`, `get_gamma_assets` |
 | `keep` | `gkeepapi` | `google_keep` |
-| `nanobanana` | `google-generativeai`, `pillow` | `nanobanana` |
+| `nano-banana-images` | `google-genai`, `pillow` | `nano-banana-images` |
 | `all` | All dependencies | All commands |
 
 ### Documentation
@@ -199,16 +199,16 @@ uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[keep]" google_ke
 
 ### Image Generation
 
-#### `nanobanana` - Gemini Image Generation
+#### `nano-banana-images` - Gemini Image Generation
 
 Generate and edit images with Google Gemini.
 
 ```bash
 # Generate image
-uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nanobanana]" nanobanana --prompt "isometric cyberpunk office" --size 1024x1024
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nano-banana-images]" nano-banana-images --prompt "isometric cyberpunk office" --size 1024x1024
 
 # Edit existing image
-uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nanobanana]" nanobanana --prompt "add a cat" --input photo.jpg --output edited.png
+uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools[nano-banana-images]" nano-banana-images --prompt "add a cat" --input photo.jpg --output edited.png
 ```
 
 ---
@@ -229,7 +229,7 @@ export GAMMA_API_KEY="your-key"
 export GOOGLE_EMAIL="your-email"
 export GOOGLE_MASTER_TOKEN="your-token"
 
-# NanoBanana
+# Nano Banana Images
 export GEMINI_API_KEY="your-key"
 ```
 

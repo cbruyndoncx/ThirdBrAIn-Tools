@@ -13,7 +13,7 @@ pip install uv
 ```bash
 uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools research "quantum computing"
 uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools generate_gamma_presentation --input-text "Q4 results"
-uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools nanobanana \  
+uvx --from https://github.com/cbruyndoncx/ThirdBrAIn-Tools nano-banana-images \
   --prompt "ultra wide shot of a futuristic boardroom" \
   --size 1344x768
 
@@ -33,8 +33,8 @@ python -m scripts.get_gamma_assets --generation-id abc123
 - **gamma** - Generate presentations, documents, social media posts, and websites with the Gamma API
   - Entry points: `generate_gamma_presentation`, `get_gamma_assets`
   - See `agentskills/gamma/SKILL.md` for full docs
-- **nanobanana** – Image generation and editing with Gemini Nano Banana  
-  - See `agentskills/nanobanana/SKILL.md` for full docs
+- **nano-banana-images** – Image generation and editing with Gemini Nano Banana
+  - See `agentskills/nano-banana-images/SKILL.md` for full docs
   
 ## Structure
 

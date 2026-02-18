@@ -100,7 +100,7 @@ uvx --from "git+https://github.com/cbruyndoncx/ThirdBrAIn-Tools@abc123[research]
 | `research` | `httpx` | `research`, `poll_research`, `extract_json` |
 | `gamma` | (base only) | `generate_gamma_presentation`, `get_gamma_assets` |
 | `keep` | `gkeepapi` | `google_keep` |
-| `nanobanana` | `google-generativeai`, `pillow` | `nanobanana` |
+| `nano-banana-images` | `google-genai`, `pillow` | `nano-banana-images` |
 | `all` | All dependencies | All commands |
 
 See [scripts/README.md](../../scripts/README.md) for full documentation on `uvx --from` options.

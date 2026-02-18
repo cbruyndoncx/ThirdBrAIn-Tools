@@ -15,7 +15,7 @@ dependencies = [
 research = ["httpx>=0.27.0"]
 gamma = []  # only needs python-dotenv
 keep = ["gkeepapi>=0.16.0", "gpsoauth>=1.0.0", "click>=8.0.0", "rich>=13.0.0"]
-nanobanana = ["google-generativeai", "pillow"]
+nano-banana-images = ["google-genai", "pillow"]
 paperbanana-lite = ["google-genai", "pillow", "tenacity"]
 all = [
     "httpx>=0.27.0",
@@ -23,7 +23,6 @@ all = [
     "gpsoauth>=1.0.0",
     "click>=8.0.0",
     "rich>=13.0.0",
-    "google-generativeai",
     "google-genai",
     "pillow",
     "tenacity",
@@ -41,7 +40,7 @@ extract_json = "scripts.extract_json:main"
 generate_gamma_presentation = "scripts.generate_gamma_presentation:main"
 get_gamma_assets = "scripts.get_gamma_assets:main"
 google_keep = "scripts.google_keep:cli"
-nanobanana = "scripts.nanobanana:main"
+nano-banana-images = "scripts.nano_banana:main"
 paperbanana-lite = "scripts.paperbanana_lite:main"
 
 [tool.setuptools]
